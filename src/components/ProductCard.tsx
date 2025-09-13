@@ -50,10 +50,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails
       <CardContent className="p-4">
         <div className="space-y-2">
           <div className="flex items-start justify-between">
-            <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-fast cursor-pointer"
-                onClick={() => onViewDetails?.(product)}>
-              {product.name}
-            </h3>
+                <h3 className="font-semibold text-sm mb-1 line-clamp-2 group-hover:text-primary transition-fast cursor-pointer"
+                    onClick={() => onViewDetails?.(product)}>
+                  {product.name}
+                </h3>
           </div>
           
           <div className="flex items-center gap-1">

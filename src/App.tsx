@@ -7,9 +7,14 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Store } from "@/pages/Store";
+import { Categories } from "@/pages/Categories";
+import { Deals } from "@/pages/Deals";
+import { Help } from "@/pages/Help";
+import { ProductDetail } from "@/pages/ProductDetail";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { ProductManagement } from "@/pages/admin/ProductManagement";
 import { UserActivityPage } from "@/pages/admin/UserActivity";
+import { AddProduct } from "@/pages/admin/AddProduct";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +33,26 @@ const App = () => (
                 <Store />
               </Layout>
             } />
+            <Route path="/categories" element={
+              <Layout>
+                <Categories />
+              </Layout>
+            } />
+            <Route path="/deals" element={
+              <Layout>
+                <Deals />
+              </Layout>
+            } />
+            <Route path="/help" element={
+              <Layout>
+                <Help />
+              </Layout>
+            } />
+            <Route path="/product/:productId" element={
+              <Layout>
+                <ProductDetail />
+              </Layout>
+            } />
             
             {/* Admin Routes */}
             <Route path="/admin" element={
@@ -41,6 +66,13 @@ const App = () => (
               <Layout>
                 <AdminLayout>
                   <ProductManagement />
+                </AdminLayout>
+              </Layout>
+            } />
+            <Route path="/admin/products/new" element={
+              <Layout>
+                <AdminLayout>
+                  <AddProduct />
                 </AdminLayout>
               </Layout>
             } />

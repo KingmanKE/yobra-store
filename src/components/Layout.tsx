@@ -27,7 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
             
             {!isAdmin && (
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden md:flex items-center gap-6">
                 <div className="relative max-w-sm">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -35,6 +35,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     className="pl-10 w-72"
                   />
                 </div>
+                <nav className="flex items-center gap-1">
+                  <Link to="/categories">
+                    <Button variant="ghost" size="sm">Categories</Button>
+                  </Link>
+                  <Link to="/deals">
+                    <Button variant="ghost" size="sm">Deals</Button>
+                  </Link>
+                </nav>
               </div>
             )}
           </div>

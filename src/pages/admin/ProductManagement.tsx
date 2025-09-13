@@ -84,15 +84,15 @@ export const ProductManagement: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             {filteredProducts.map((product) => (
-              <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-fast">
-                <div className="flex items-center gap-4">
+              <div key={product.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-fast gap-4">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
                   <img 
                     src={product.image} 
                     alt={product.name}
-                    className="w-16 h-16 rounded-lg object-cover"
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                   />
-                  <div>
-                    <h3 className="font-semibold">{product.name}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold line-clamp-1">{product.name}</h3>
                     <p className="text-sm text-muted-foreground">{product.brand} • {product.category}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant={product.inStock ? 'default' : 'destructive'}>
@@ -107,7 +107,7 @@ export const ProductManagement: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="text-right">
                     <p className="font-semibold text-lg">${product.price}</p>
                     {product.originalPrice && (
