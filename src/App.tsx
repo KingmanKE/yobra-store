@@ -11,6 +11,13 @@ import { Categories } from "@/pages/Categories";
 import { Deals } from "@/pages/Deals";
 import { Help } from "@/pages/Help";
 import { ProductDetail } from "@/pages/ProductDetail";
+import { SignUp } from "@/pages/SignUp";
+import { Login } from "@/pages/Login";
+import { Cart } from "@/pages/Cart";
+import { About } from "@/pages/About";
+import { Contact } from "@/pages/Contact";
+import { Account } from "@/pages/Account";
+import { Wishlist } from "@/pages/Wishlist";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { ProductManagement } from "@/pages/admin/ProductManagement";
 import { UserActivityPage } from "@/pages/admin/UserActivity";
@@ -51,6 +58,33 @@ const App = () => (
             <Route path="/product/:productId" element={
               <Layout>
                 <ProductDetail />
+              </Layout>
+            } />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cart" element={
+              <Layout>
+                <Cart />
+              </Layout>
+            } />
+            <Route path="/about" element={
+              <Layout>
+                <About />
+              </Layout>
+            } />
+            <Route path="/contact" element={
+              <Layout>
+                <Contact />
+              </Layout>
+            } />
+            <Route path="/account" element={
+              <Layout>
+                <Account />
+              </Layout>
+            } />
+            <Route path="/wishlist" element={
+              <Layout>
+                <Wishlist />
               </Layout>
             } />
             
@@ -105,7 +139,11 @@ const App = () => (
             } />
             
             {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={
+              <Layout>
+                <NotFound />
+              </Layout>
+            } />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
