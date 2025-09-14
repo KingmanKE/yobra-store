@@ -13,68 +13,78 @@ export const SignUp = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign up logic here
     console.log("Sign up:", formData);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-200 to-blue-300 items-center justify-center p-12">
-        <div className="text-center">
-          <div className="w-96 h-96 bg-white/20 rounded-3xl flex items-center justify-center mb-8">
-            <div className="text-white text-6xl">🛒📱</div>
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-100 to-blue-200 items-center justify-center p-12">
+        <div className="relative w-full max-w-md">
+          <div className="aspect-square bg-white/10 rounded-3xl p-8 flex items-center justify-center backdrop-blur-sm">
+            <div className="relative">
+              <div className="w-64 h-64 bg-gradient-to-br from-pink-200 to-pink-400 rounded-3xl flex items-center justify-center text-8xl shadow-lg">
+                📱
+              </div>
+              <div className="absolute -bottom-4 -right-4 w-24 h-16 bg-gradient-to-br from-purple-300 to-purple-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                🛍️
+              </div>
+              <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-br from-blue-300 to-blue-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                🛒
+              </div>
+            </div>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">Join Exclusive Today</h2>
-          <p className="text-white/80 text-lg">Discover amazing products and exclusive deals</p>
         </div>
       </div>
 
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Create an account</h1>
-              <p className="text-muted-foreground">Enter your details below</p>
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-left">
+            <h1 className="text-4xl font-medium mb-4">Create an account</h1>
+            <p className="text-gray-600">Enter your details below</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Input
+                type="text"
+                placeholder="Name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+                className="border-0 border-b border-gray-300 rounded-none bg-transparent px-0 focus:border-gray-600 focus:ring-0"
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
+            <div>
+              <Input
+                type="email"
+                placeholder="Email or Phone Number"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                className="border-0 border-b border-gray-300 rounded-none bg-transparent px-0 focus:border-gray-600 focus:ring-0"
+              />
+            </div>
 
-              <div>
-                <Input
-                  type="email"
-                  placeholder="Email or Phone Number"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                className="border-0 border-b border-gray-300 rounded-none bg-transparent px-0 focus:border-gray-600 focus:ring-0"
+              />
+            </div>
 
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
-
-              <Button type="submit" className="w-full bg-destructive hover:bg-destructive/90">
+            <div className="space-y-4">
+              <Button type="submit" className="w-full bg-destructive hover:bg-destructive/90 h-12 rounded">
                 Create Account
               </Button>
 
-              <Button type="button" variant="outline" className="w-full">
+              <Button type="button" variant="outline" className="w-full h-12 rounded border-gray-300">
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -83,16 +93,16 @@ export const SignUp = () => {
                 </svg>
                 Sign up with Google
               </Button>
-            </form>
+            </div>
+          </form>
 
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Already have account?{" "}
-              <Link to="/login" className="text-primary hover:underline">
-                Log in
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
+          <p className="text-center text-gray-600">
+            Already have account?{" "}
+            <Link to="/login" className="underline hover:no-underline">
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

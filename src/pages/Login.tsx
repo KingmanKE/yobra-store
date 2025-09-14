@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,71 +11,71 @@ export const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
     console.log("Login:", formData);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-200 to-blue-300 items-center justify-center p-12">
-        <div className="text-center">
-          <div className="w-96 h-96 bg-white/20 rounded-3xl flex items-center justify-center mb-8">
-            <div className="text-white text-6xl">🛒📱</div>
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-100 to-blue-200 items-center justify-center p-12">
+        <div className="relative w-full max-w-md">
+          <div className="aspect-square bg-white/10 rounded-3xl p-8 flex items-center justify-center backdrop-blur-sm">
+            <div className="relative">
+              <div className="w-64 h-64 bg-gradient-to-br from-pink-200 to-pink-400 rounded-3xl flex items-center justify-center text-8xl shadow-lg">
+                📱
+              </div>
+              <div className="absolute -bottom-4 -right-4 w-24 h-16 bg-gradient-to-br from-purple-300 to-purple-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                🛍️
+              </div>
+              <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-br from-blue-300 to-blue-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                🛒
+              </div>
+            </div>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">Welcome Back</h2>
-          <p className="text-white/80 text-lg">Continue your shopping journey</p>
         </div>
       </div>
 
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Log in to Exclusive</h1>
-              <p className="text-muted-foreground">Enter your details below</p>
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-left">
+            <h1 className="text-4xl font-medium mb-4">Log in to Exclusive</h1>
+            <p className="text-gray-600">Enter your details below</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Input
+                type="email"
+                placeholder="Email or Phone Number"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                className="border-0 border-b border-gray-300 rounded-none bg-transparent px-0 focus:border-gray-600 focus:ring-0"
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Input
-                  type="email"
-                  placeholder="Email or Phone Number"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                className="border-0 border-b border-gray-300 rounded-none bg-transparent px-0 focus:border-gray-600 focus:ring-0"
+              />
+            </div>
 
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <Button type="submit" className="bg-destructive hover:bg-destructive/90">
-                  Log In
-                </Button>
-                <Link to="/forgot-password" className="text-destructive hover:underline text-sm">
-                  Forget Password?
-                </Link>
-              </div>
-            </form>
-
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Don't have an account?{" "}
-              <Link to="/sign-up" className="text-primary hover:underline">
-                Sign up
+            <div className="flex justify-between items-center">
+              <Button type="submit" className="bg-destructive hover:bg-destructive/90 px-8">
+                Log In
+              </Button>
+              <Link to="/forgot-password" className="text-destructive hover:underline text-sm">
+                Forget Password?
               </Link>
-            </p>
-          </CardContent>
-        </Card>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

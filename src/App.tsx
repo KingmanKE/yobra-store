@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Store } from "@/pages/Store";
+import { Home } from "@/pages/Home";
 import { Categories } from "@/pages/Categories";
 import { Deals } from "@/pages/Deals";
 import { Help } from "@/pages/Help";
@@ -37,7 +37,7 @@ const App = () => (
             {/* Store Routes */}
             <Route path="/" element={
               <Layout>
-                <Store />
+                <Home />
               </Layout>
             } />
             <Route path="/categories" element={
