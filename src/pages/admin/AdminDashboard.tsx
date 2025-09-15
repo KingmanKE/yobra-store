@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
   Package, 
@@ -8,76 +9,202 @@ import {
   ShoppingCart,
   DollarSign,
   Eye,
-  MessageCircle
+  MessageCircle,
+  BarChart3,
+  Calendar,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  Plus,
+  Settings
 } from 'lucide-react';
 import { mockProducts, mockUserActivities } from '@/data/mockData';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const totalProducts = mockProducts.length;
   const inStockProducts = mockProducts.filter(p => p.inStock).length;
-  const totalRevenue = mockProducts.reduce((sum, p) => sum + (p.price * 10), 0); // Mock revenue
+  const outOfStockProducts = totalProducts - inStockProducts;
+  const totalRevenue = mockProducts.reduce((sum, p) => sum + (p.price * 10), 0);
   const recentActivities = mockUserActivities.slice(0, 5);
+  const totalOrders = 156; // Mock data
+  const pendingOrders = 23; // Mock data
 
   const stats = [
-    {
-      title: 'Total Products',
-      value: totalProducts,
-      icon: Package,
-      change: '+12%',
-      changeType: 'positive' as const
-    },
-    {
-      title: 'In Stock',
-      value: inStockProducts,
-      icon: TrendingUp,
-      change: '+5%',
-      changeType: 'positive' as const
-    },
     {
       title: 'Total Revenue',
       value: `$${totalRevenue.toLocaleString()}`,
       icon: DollarSign,
       change: '+23%',
-      changeType: 'positive' as const
+      changeType: 'positive' as const,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50 dark:bg-emerald-950'
+    },
+    {
+      title: 'Total Orders',
+      value: totalOrders,
+      icon: ShoppingCart,
+      change: '+12%',
+      changeType: 'positive' as const,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50 dark:bg-blue-950'
+    },
+    {
+      title: 'Total Products',
+      value: totalProducts,
+      icon: Package,
+      change: '+8%',
+      changeType: 'positive' as const,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50 dark:bg-purple-950'
     },
     {
       title: 'Active Users',
       value: '1,247',
       icon: Users,
-      change: '+8%',
-      changeType: 'positive' as const
+      change: '+15%',
+      changeType: 'positive' as const,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50 dark:bg-orange-950'
     }
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your store performance</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-2">Welcome back! Here's what's happening with your store today.</p>
+        </div>
+        <div className="flex gap-3">
+          <Button 
+            onClick={() => navigate('/admin/products/new')}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/admin/settings')}
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Button>
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon;
+          const isPositive = stat.changeType === 'positive';
+          const ChangeIcon = isPositive ? ArrowUpIcon : ArrowDownIcon;
+          
           return (
-            <Card key={stat.title} className="gradient-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+            <Card key={stat.title} className="relative overflow-hidden border-0 shadow-lg">
+              <div className={`absolute inset-0 ${stat.bgColor} opacity-50`} />
+              <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                </div>
+                <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Badge variant={stat.changeType === 'positive' ? 'default' : 'destructive'} className="text-xs">
+              <CardContent className="relative pt-0">
+                <div className="flex items-center gap-2">
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+                    isPositive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 
+                    'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                  }`}>
+                    <ChangeIcon className="h-3 w-3" />
                     {stat.change}
-                  </Badge>
-                  <span className="ml-2">from last month</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">vs last month</span>
                 </div>
               </CardContent>
             </Card>
           );
         })}
+      </div>
+
+      {/* Inventory Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Stock Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">In Stock</span>
+              <span className="font-semibold text-emerald-600">{inStockProducts}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Out of Stock</span>
+              <span className="font-semibold text-red-600">{outOfStockProducts}</span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div 
+                className="bg-emerald-500 h-2 rounded-full" 
+                style={{ width: `${(inStockProducts / totalProducts) * 100}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Orders Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Completed</span>
+              <span className="font-semibold text-emerald-600">{totalOrders - pendingOrders}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Pending</span>
+              <span className="font-semibold text-orange-600">{pendingOrders}</span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div 
+                className="bg-emerald-500 h-2 rounded-full" 
+                style={{ width: `${((totalOrders - pendingOrders) / totalOrders) * 100}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/admin/products/new')}
+                className="h-16 flex-col gap-1"
+              >
+                <Package className="h-4 w-4" />
+                <span className="text-xs">Add Product</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/admin/orders')}
+                className="h-16 flex-col gap-1"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span className="text-xs">View Orders</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -160,28 +287,20 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Analytics Chart Placeholder */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Sales Analytics
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-fast">
-              <Package className="h-6 w-6 text-primary mb-2" />
-              <p className="text-sm font-medium">Add Product</p>
-            </div>
-            <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-fast">
-              <Users className="h-6 w-6 text-primary mb-2" />
-              <p className="text-sm font-medium">View Users</p>
-            </div>
-            <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-fast">
-              <ShoppingCart className="h-6 w-6 text-primary mb-2" />
-              <p className="text-sm font-medium">Orders</p>
-            </div>
-            <div className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-fast">
-              <TrendingUp className="h-6 w-6 text-primary mb-2" />
-              <p className="text-sm font-medium">Analytics</p>
+          <div className="h-64 flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg">
+            <div className="text-center">
+              <BarChart3 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-muted-foreground">Sales chart will be displayed here</p>
+              <p className="text-sm text-muted-foreground/75">Connect your analytics to view detailed insights</p>
             </div>
           </div>
         </CardContent>

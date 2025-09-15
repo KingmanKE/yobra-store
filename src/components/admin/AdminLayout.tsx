@@ -7,7 +7,9 @@ import {
   Users, 
   BarChart3, 
   Settings, 
-  Plus 
+  Plus,
+  ShoppingCart,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,9 +29,19 @@ const adminNavItems = [
     icon: Package
   },
   {
+    title: 'Orders',
+    href: '/admin/orders',
+    icon: ShoppingCart
+  },
+  {
+    title: 'Users',
+    href: '/admin/users',
+    icon: Users
+  },
+  {
     title: 'User Activity',
     href: '/admin/activities',
-    icon: Users
+    icon: Activity
   },
   {
     title: 'Analytics',

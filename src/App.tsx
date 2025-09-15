@@ -22,6 +22,9 @@ import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { ProductManagement } from "@/pages/admin/ProductManagement";
 import { UserActivityPage } from "@/pages/admin/UserActivity";
 import { AddProduct } from "@/pages/admin/AddProduct";
+import { Orders } from "@/pages/admin/Orders";
+import { Users } from "@/pages/admin/Users";
+import { Settings } from "@/pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,6 +120,20 @@ const App = () => (
                 </AdminLayout>
               </Layout>
             } />
+            <Route path="/admin/orders" element={
+              <Layout>
+                <AdminLayout>
+                  <Orders />
+                </AdminLayout>
+              </Layout>
+            } />
+            <Route path="/admin/users" element={
+              <Layout>
+                <AdminLayout>
+                  <Users />
+                </AdminLayout>
+              </Layout>
+            } />
             <Route path="/admin/analytics" element={
               <Layout>
                 <AdminLayout>
@@ -130,10 +147,7 @@ const App = () => (
             <Route path="/admin/settings" element={
               <Layout>
                 <AdminLayout>
-                  <div className="text-center py-12">
-                    <h2 className="text-2xl font-bold mb-4">Settings</h2>
-                    <p className="text-muted-foreground">Configuration options coming soon...</p>
-                  </div>
+                  <Settings />
                 </AdminLayout>
               </Layout>
             } />
