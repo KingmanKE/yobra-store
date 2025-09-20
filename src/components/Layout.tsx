@@ -15,7 +15,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isAdmin = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Top Banner */}
       <div className="bg-black text-white text-center py-2 text-sm">
         Summer Sale For All Swim Suits And Free Express Delivery - OFF 50!{" "}
@@ -92,7 +92,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <footer className="bg-black text-white">
+      <footer className="bg-black text-white mt-auto">
         <div className="container py-16">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div>
