@@ -30,6 +30,7 @@ import { UserActivityPage } from "@/pages/admin/UserActivity";
 import { AddProduct } from "@/pages/admin/AddProduct";
 import { Orders } from "@/pages/admin/Orders";
 import { Users } from "@/pages/admin/Users";
+import { Analytics } from "@/pages/admin/Analytics";
 import { Settings } from "@/pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -173,10 +174,7 @@ const App = () => (
             <Route path="/admin/analytics" element={
               <Layout>
                 <AdminLayout>
-                  <div className="text-center py-12">
-                    <h2 className="text-2xl font-bold mb-4">Analytics Dashboard</h2>
-                    <p className="text-muted-foreground">Coming soon...</p>
-                  </div>
+                  <Analytics />
                 </AdminLayout>
               </Layout>
             } />
