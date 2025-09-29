@@ -23,6 +23,7 @@ import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { FAQ } from "@/pages/FAQ";
 import { AddressBook } from "@/pages/AddressBook";
+import { Cancellations } from "@/pages/Cancellations";
 import { PaymentOptions } from "@/pages/PaymentOptions";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { ProductManagement } from "@/pages/admin/ProductManagement";
@@ -120,6 +121,11 @@ const App = () => (
             <Route path="/account/address" element={
               <Layout>
                 <AddressBook />
+              </Layout>
+            } />
+            <Route path="/account/cancellations" element={
+              <Layout>
+                <Cancellations />
               </Layout>
             } />
             <Route path="/account/payment" element={
