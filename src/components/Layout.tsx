@@ -23,21 +23,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
       
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="text-2xl font-bold">
-              Exclusive
-            </Link>
-            
-            {!isAdmin && (
-              <nav className="hidden md:flex items-center gap-8">
+        <div className="container flex h-16 items-center">
+          <Link to="/" className="text-2xl font-bold">
+            Exclusive
+          </Link>
+          
+          {!isAdmin && (
+            <nav className="flex-1 flex justify-center">
+              <div className="hidden md:flex items-center gap-8">
                 <Link to="/" className="hover:underline">Home</Link>
                 <Link to="/contact" className="hover:underline">Contact</Link>
                 <Link to="/about" className="hover:underline">About</Link>
-                <Link to="/sign-up" className="hover:underline">Sign Up</Link>
-              </nav>
-            )}
-          </div>
+              </div>
+            </nav>
+          )}
 
           <div className="flex items-center gap-4">
             {!isAdmin && (
