@@ -18,6 +18,12 @@ import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
 import { Account } from "@/pages/Account";
 import { Wishlist } from "@/pages/Wishlist";
+import { Products } from "@/pages/Products";
+import { Privacy } from "@/pages/Privacy";
+import { Terms } from "@/pages/Terms";
+import { FAQ } from "@/pages/FAQ";
+import { AddressBook } from "@/pages/AddressBook";
+import { PaymentOptions } from "@/pages/PaymentOptions";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { ProductManagement } from "@/pages/admin/ProductManagement";
 import { UserActivityPage } from "@/pages/admin/UserActivity";
@@ -88,6 +94,36 @@ const App = () => (
             <Route path="/wishlist" element={
               <Layout>
                 <Wishlist />
+              </Layout>
+            } />
+            <Route path="/products" element={
+              <Layout>
+                <Products />
+              </Layout>
+            } />
+            <Route path="/privacy" element={
+              <Layout>
+                <Privacy />
+              </Layout>
+            } />
+            <Route path="/terms" element={
+              <Layout>
+                <Terms />
+              </Layout>
+            } />
+            <Route path="/faq" element={
+              <Layout>
+                <FAQ />
+              </Layout>
+            } />
+            <Route path="/account/address" element={
+              <Layout>
+                <AddressBook />
+              </Layout>
+            } />
+            <Route path="/account/payment" element={
+              <Layout>
+                <PaymentOptions />
               </Layout>
             } />
             
