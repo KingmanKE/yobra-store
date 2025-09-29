@@ -89,15 +89,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             );
           })}
         </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <Link to="/admin/products/new">
-            <Button className="w-full gradient-primary">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product
-            </Button>
-          </Link>
-        </div>
       </div>
 
       {/* Main content */}
