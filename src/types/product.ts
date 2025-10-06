@@ -14,6 +14,7 @@ export interface Product {
   stockQuantity: number;
   features: string[];
   tags: string[];
+  isTodaysDeals?: boolean;
   createdAt: string;
   updatedAt: string;
 }

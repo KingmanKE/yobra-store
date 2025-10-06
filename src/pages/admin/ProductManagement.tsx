@@ -9,12 +9,17 @@ import {
   Plus, 
   Search,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  Zap
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import { mockProducts } from '@/data/mockData';
 import { Product } from '@/types/product';
 
 export const ProductManagement: React.FC = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -30,6 +35,25 @@ export const ProductManagement: React.FC = () => {
 
   const handleDeleteProduct = (productId: string) => {
     setProducts(products.filter(p => p.id !== productId));
+    toast({
+      title: "Product deleted",
+      description: "The product has been removed successfully.",
+    });
+  };
+
+  const handleToggleTodaysDeals = (productId: string) => {
+    setProducts(products.map(p => 
+      p.id === productId 
+        ? { ...p, isTodaysDeals: !p.isTodaysDeals }
+        : p
+    ));
+    const product = products.find(p => p.id === productId);
+    toast({
+      title: product?.isTodaysDeals ? "Removed from Today's Deals" : "Added to Today's Deals",
+      description: product?.isTodaysDeals 
+        ? "The product has been removed from deals." 
+        : "The product is now featured in Today's Deals.",
+    });
   };
 
   return (
@@ -39,7 +63,7 @@ export const ProductManagement: React.FC = () => {
           <h1 className="text-3xl font-bold">Product Management</h1>
           <p className="text-muted-foreground">Manage your store inventory</p>
         </div>
-        <Button className="gradient-primary">
+        <Button className="gradient-primary" onClick={() => navigate('/admin/products/new')}>
           <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
@@ -103,6 +127,12 @@ export const ProductManagement: React.FC = () => {
                           -{product.discount}%
                         </Badge>
                       )}
+                      {product.isTodaysDeals && (
+                        <Badge className="gradient-primary">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Today's Deal
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -121,6 +151,14 @@ export const ProductManagement: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
+                    <Button 
+                      variant={product.isTodaysDeals ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => handleToggleTodaysDeals(product.id)}
+                      title={product.isTodaysDeals ? "Remove from Today's Deals" : "Add to Today's Deals"}
+                    >
+                      <Zap className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="sm">
                       <Edit className="h-4 w-4" />
                     </Button>

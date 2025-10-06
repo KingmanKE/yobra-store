@@ -28,6 +28,7 @@ export const AddProduct: React.FC = () => {
     brand: '',
     stockQuantity: 0,
     inStock: true,
+    isTodaysDeals: false,
     features: [],
     tags: [],
     rating: 0,
@@ -103,6 +104,7 @@ export const AddProduct: React.FC = () => {
       stockQuantity: formData.stockQuantity || 0,
       features: formData.features || [],
       tags: formData.tags || [],
+      isTodaysDeals: formData.isTodaysDeals || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -255,6 +257,18 @@ export const AddProduct: React.FC = () => {
                     onCheckedChange={(checked) => handleInputChange('inStock', checked)}
                   />
                   <Label htmlFor="inStock">In Stock</Label>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 p-4 border rounded-lg bg-accent/5">
+                <Switch
+                  id="isTodaysDeals"
+                  checked={formData.isTodaysDeals}
+                  onCheckedChange={(checked) => handleInputChange('isTodaysDeals', checked)}
+                />
+                <div>
+                  <Label htmlFor="isTodaysDeals" className="cursor-pointer">Add to Today's Deals</Label>
+                  <p className="text-sm text-muted-foreground">Feature this product on the deals page</p>
                 </div>
               </div>
             </CardContent>

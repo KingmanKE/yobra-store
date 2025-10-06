@@ -32,6 +32,7 @@ export const Deals: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const todaysDeals = mockProducts.filter(p => p.isTodaysDeals);
   const flashDeals = mockProducts.filter(p => p.discount && p.discount > 10);
   const dailyDeals = mockProducts.filter(p => p.discount && p.discount > 5).slice(0, 6);
   const weeklyDeals = mockProducts.filter(p => p.tags.includes('featured')).slice(0, 4);
@@ -70,6 +71,18 @@ export const Deals: React.FC = () => {
       </section>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Today's Deals */}
+        {todaysDeals.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center gap-2 mb-6">
+              <Zap className="h-6 w-6 text-accent" />
+              <h2 className="text-3xl font-bold">Today's Deals</h2>
+              <Badge className="gradient-primary">Handpicked for You</Badge>
+            </div>
+            <ProductGrid products={todaysDeals} />
+          </section>
+        )}
+
         {/* Flash Deals */}
         <section className="mb-12">
           <div className="flex items-center gap-2 mb-6">
