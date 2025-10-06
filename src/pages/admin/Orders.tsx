@@ -14,6 +14,7 @@ import {
   XCircle,
   Truck
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Order {
   id: string;
@@ -80,6 +81,7 @@ const mockOrders: Order[] = [
 ];
 
 export const Orders: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -251,7 +253,12 @@ export const Orders: React.FC = () => {
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </Badge>
 
-                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                    onClick={() => navigate(`/admin/orders/${order.id}`)}
+                  >
                     <Eye className="h-4 w-4" />
                     View
                   </Button>

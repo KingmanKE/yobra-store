@@ -33,6 +33,9 @@ import { Orders } from "@/pages/admin/Orders";
 import { Users } from "@/pages/admin/Users";
 import { Analytics } from "@/pages/admin/Analytics";
 import { Settings } from "@/pages/admin/Settings";
+import { AddUser } from "@/pages/admin/AddUser";
+import { EditProduct } from "@/pages/admin/EditProduct";
+import { ViewOrder } from "@/pages/admin/ViewOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -153,6 +156,27 @@ const App = () => (
               <Layout>
                 <AdminLayout>
                   <AddProduct />
+                </AdminLayout>
+              </Layout>
+            } />
+            <Route path="/admin/products/edit/:productId" element={
+              <Layout>
+                <AdminLayout>
+                  <EditProduct />
+                </AdminLayout>
+              </Layout>
+            } />
+            <Route path="/admin/users/new" element={
+              <Layout>
+                <AdminLayout>
+                  <AddUser />
+                </AdminLayout>
+              </Layout>
+            } />
+            <Route path="/admin/orders/:orderId" element={
+              <Layout>
+                <AdminLayout>
+                  <ViewOrder />
                 </AdminLayout>
               </Layout>
             } />

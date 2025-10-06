@@ -159,7 +159,11 @@ export const ProductManagement: React.FC = () => {
                     >
                       <Zap className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => navigate(`/admin/products/edit/${product.id}`)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button 

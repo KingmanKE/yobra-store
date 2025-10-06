@@ -15,6 +15,7 @@ import {
   Shield,
   User
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: string;
@@ -93,6 +94,7 @@ const mockUsers: User[] = [
 ];
 
 export const Users: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -133,7 +135,7 @@ export const Users: React.FC = () => {
           <h1 className="text-3xl font-bold">Users</h1>
           <p className="text-muted-foreground mt-2">Manage system users and customers</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => navigate('/admin/users/new')}>
           <UserPlus className="h-4 w-4" />
           Add User
         </Button>
