@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Plus, 
   X, 
@@ -14,23 +17,25 @@ import {
   Save,
   Eye
 } from 'lucide-react';
-import { Product } from '@/types/product';
 
 export const AddProduct: React.FC = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<Partial<Product>>({
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: 0,
     originalPrice: 0,
     image: '',
-    category: '',
+    category_id: '',
     brand: '',
     stockQuantity: 0,
     inStock: true,
     isTodaysDeals: false,
-    features: [],
-    tags: [],
+    features: [] as string[],
+    tags: [] as string[],
     rating: 0,
     reviews: 0
   });
@@ -39,10 +44,24 @@ export const AddProduct: React.FC = () => {
   const [newTag, setNewTag] = useState('');
   const [imagePreview, setImagePreview] = useState('');
 
-  const categories = ['Smartphones', 'Laptops', 'Audio', 'Tablets', 'Furniture', 'Gaming', 'Cameras', 'Accessories'];
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from('categories')
+      .select('id, name')
+      .order('name');
+    
+    if (data) {
+      setCategories(data);
+    }
+  };
+
   const tagSuggestions = ['popular', 'featured', 'new', 'bestseller', 'premium', 'gaming', 'professional', 'creative'];
 
-  const handleInputChange = (field: keyof Product, value: any) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -50,25 +69,25 @@ export const AddProduct: React.FC = () => {
   };
 
   const addFeature = () => {
-    if (newFeature.trim() && !formData.features?.includes(newFeature.trim())) {
-      handleInputChange('features', [...(formData.features || []), newFeature.trim()]);
+    if (newFeature.trim() && !formData.features.includes(newFeature.trim())) {
+      handleInputChange('features', [...formData.features, newFeature.trim()]);
       setNewFeature('');
     }
   };
 
   const removeFeature = (index: number) => {
-    const updatedFeatures = formData.features?.filter((_, i) => i !== index) || [];
+    const updatedFeatures = formData.features.filter((_, i) => i !== index);
     handleInputChange('features', updatedFeatures);
   };
 
   const addTag = (tag: string) => {
-    if (!formData.tags?.includes(tag)) {
-      handleInputChange('tags', [...(formData.tags || []), tag]);
+    if (!formData.tags.includes(tag)) {
+      handleInputChange('tags', [...formData.tags, tag]);
     }
   };
 
   const removeTag = (index: number) => {
-    const updatedTags = formData.tags?.filter((_, i) => i !== index) || [];
+    const updatedTags = formData.tags.filter((_, i) => i !== index);
     handleInputChange('tags', updatedTags);
   };
 
@@ -85,33 +104,50 @@ export const AddProduct: React.FC = () => {
     return 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      name: formData.name || '',
-      description: formData.description || '',
-      price: formData.price || 0,
-      originalPrice: formData.originalPrice || undefined,
-      discount: calculateDiscount(),
-      image: formData.image || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop',
-      category: formData.category || '',
-      brand: formData.brand || '',
-      rating: 0,
-      reviews: 0,
-      inStock: formData.inStock || true,
-      stockQuantity: formData.stockQuantity || 0,
-      features: formData.features || [],
-      tags: formData.tags || [],
-      isTodaysDeals: formData.isTodaysDeals || false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      const discount = calculateDiscount();
+      
+      const { error } = await supabase
+        .from('products')
+        .insert([{
+          name: formData.name,
+          description: formData.description,
+          price: formData.price,
+          original_price: formData.originalPrice || null,
+          discount: discount,
+          image: formData.image || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop',
+          category_id: formData.category_id || null,
+          brand: formData.brand,
+          rating: formData.rating,
+          reviews: formData.reviews,
+          in_stock: formData.inStock,
+          stock_quantity: formData.stockQuantity,
+          features: formData.features,
+          tags: formData.tags,
+          is_todays_deals: formData.isTodaysDeals
+        }]);
 
-    console.log('New product:', newProduct);
-    // Here you would typically save to your backend
-    navigate('/admin/products');
+      if (error) throw error;
+
+      toast({
+        title: "Product added",
+        description: "The product has been added successfully.",
+      });
+      
+      navigate('/admin/products');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -176,18 +212,19 @@ export const AddProduct: React.FC = () => {
                 </div>
                 <div>
                   <Label htmlFor="category">Category *</Label>
-                  <select
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground"
-                    required
+                  <Select
+                    value={formData.category_id}
+                    onValueChange={(value) => handleInputChange('category_id', value)}
                   >
-                    <option value="">Select category</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>

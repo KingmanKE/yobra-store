@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,47 +14,126 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { mockProducts } from '@/data/mockData';
-import { Product } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  original_price: number | null;
+  discount: number | null;
+  image: string;
+  brand: string;
+  in_stock: boolean;
+  stock_quantity: number;
+  is_todays_deals: boolean;
+  categories: { name: string } | null;
+}
 
 export const ProductManagement: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*, categories(name)')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive'
+      });
+    } else {
+      setProducts(data || []);
+    }
+    setLoading(false);
+  };
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from('categories')
+      .select('name')
+      .order('name');
+    
+    if (data) {
+      setCategories(data.map(c => c.name));
+    }
+  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.brand.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === '' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === '' || product.categories?.name === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const categories = Array.from(new Set(products.map(p => p.category)));
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
 
-  const handleDeleteProduct = (productId: string) => {
-    setProducts(products.filter(p => p.id !== productId));
-    toast({
-      title: "Product deleted",
-      description: "The product has been removed successfully.",
-    });
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Product deleted",
+        description: "The product has been removed successfully.",
+      });
+      fetchProducts();
+    }
   };
 
-  const handleToggleTodaysDeals = (productId: string) => {
-    setProducts(products.map(p => 
-      p.id === productId 
-        ? { ...p, isTodaysDeals: !p.isTodaysDeals }
-        : p
-    ));
+  const handleToggleTodaysDeals = async (productId: string) => {
     const product = products.find(p => p.id === productId);
-    toast({
-      title: product?.isTodaysDeals ? "Removed from Today's Deals" : "Added to Today's Deals",
-      description: product?.isTodaysDeals 
-        ? "The product has been removed from deals." 
-        : "The product is now featured in Today's Deals.",
-    });
+    if (!product) return;
+
+    const { error } = await supabase
+      .from('products')
+      .update({ is_todays_deals: !product.is_todays_deals })
+      .eq('id', productId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: product.is_todays_deals ? "Removed from Today's Deals" : "Added to Today's Deals",
+        description: product.is_todays_deals 
+          ? "The product has been removed from deals." 
+          : "The product is now featured in Today's Deals.",
+      });
+      fetchProducts();
+    }
   };
+
+  if (loading) {
+    return <div className="text-center py-12">Loading products...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -117,17 +196,17 @@ export const ProductManagement: React.FC = () => {
                   />
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold line-clamp-1">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.brand} • {product.category}</p>
+                    <p className="text-sm text-muted-foreground">{product.brand} • {product.categories?.name || 'No Category'}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={product.inStock ? 'default' : 'destructive'}>
-                        {product.inStock ? 'In Stock' : 'Out of Stock'}
+                      <Badge variant={product.in_stock ? 'default' : 'destructive'}>
+                        {product.in_stock ? 'In Stock' : 'Out of Stock'}
                       </Badge>
                       {product.discount && product.discount > 0 && (
                         <Badge className="bg-accent hover:bg-accent-hover">
                           -{product.discount}%
                         </Badge>
                       )}
-                      {product.isTodaysDeals && (
+                      {product.is_todays_deals && (
                         <Badge className="gradient-primary">
                           <Zap className="h-3 w-3 mr-1" />
                           Today's Deal
@@ -140,22 +219,22 @@ export const ProductManagement: React.FC = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="text-right">
                     <p className="font-semibold text-lg">${product.price}</p>
-                    {product.originalPrice && (
+                    {product.original_price && (
                       <p className="text-sm text-muted-foreground line-through">
-                        ${product.originalPrice}
+                        ${product.original_price}
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      Stock: {product.stockQuantity}
+                      Stock: {product.stock_quantity}
                     </p>
                   </div>
                   
                   <div className="flex items-center gap-2">
                     <Button 
-                      variant={product.isTodaysDeals ? "default" : "outline"} 
+                      variant={product.is_todays_deals ? "default" : "outline"} 
                       size="sm"
                       onClick={() => handleToggleTodaysDeals(product.id)}
-                      title={product.isTodaysDeals ? "Remove from Today's Deals" : "Add to Today's Deals"}
+                      title={product.is_todays_deals ? "Remove from Today's Deals" : "Add to Today's Deals"}
                     >
                       <Zap className="h-4 w-4" />
                     </Button>
@@ -194,13 +273,13 @@ export const ProductManagement: React.FC = () => {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-2xl font-bold">{products.filter(p => p.inStock).length}</div>
+            <div className="text-2xl font-bold">{products.filter(p => p.in_stock).length}</div>
             <p className="text-sm text-muted-foreground">In Stock</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-2xl font-bold">{products.filter(p => !p.inStock).length}</div>
+            <div className="text-2xl font-bold">{products.filter(p => !p.in_stock).length}</div>
             <p className="text-sm text-muted-foreground">Out of Stock</p>
           </CardContent>
         </Card>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,9 +6,38 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProductGrid } from '@/components/ProductGrid';
-import { mockProducts, mockCategories } from '@/data/mockData';
-import { Product, Category } from '@/types/product';
-import { Search, Filter, Grid, List, TrendingUp, Star } from 'lucide-react';
+import { Search, Filter, Grid, List } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  original_price: number | null;
+  discount: number | null;
+  image: string;
+  category_id: string | null;
+  brand: string;
+  rating: number;
+  reviews: number;
+  in_stock: boolean;
+  stock_quantity: number;
+  features: string[];
+  tags: string[];
+  is_todays_deals: boolean;
+  created_at: string;
+  categories: { name: string } | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description: string | null;
+  image: string | null;
+  product_count: number;
+}
 
 export const Products: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,11 +45,41 @@ export const Products: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('featured');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [priceRange, setPriceRange] = useState<string>('all');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Filter and sort products
-  let filteredProducts = mockProducts;
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // Filter by search query
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [productsRes, categoriesRes] = await Promise.all([
+        supabase.from('products').select('*, categories(name)').order('created_at', { ascending: false }),
+        supabase.from('categories').select('*').order('name')
+      ]);
+
+      if (productsRes.error) throw productsRes.error;
+      if (categoriesRes.error) throw categoriesRes.error;
+
+      setProducts(productsRes.data || []);
+      setCategories(categoriesRes.data || []);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  let filteredProducts = [...products];
+
   if (searchQuery) {
     filteredProducts = filteredProducts.filter(product =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -29,12 +88,12 @@ export const Products: React.FC = () => {
     );
   }
 
-  // Filter by category
   if (selectedCategory !== 'all') {
-    filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
+    filteredProducts = filteredProducts.filter(
+      product => product.categories?.name === selectedCategory
+    );
   }
 
-  // Filter by price range
   if (priceRange !== 'all') {
     switch (priceRange) {
       case 'under-50':
@@ -52,34 +111,62 @@ export const Products: React.FC = () => {
     }
   }
 
-  // Sort products
   switch (sortBy) {
     case 'price-low':
-      filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+      filteredProducts.sort((a, b) => a.price - b.price);
       break;
     case 'price-high':
-      filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+      filteredProducts.sort((a, b) => b.price - a.price);
       break;
     case 'rating':
-      filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
+      filteredProducts.sort((a, b) => b.rating - a.rating);
       break;
     case 'newest':
-      filteredProducts = [...filteredProducts].sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      filteredProducts.sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       break;
     default:
-      // Featured products first
-      filteredProducts = [...filteredProducts].sort((a, b) => {
+      filteredProducts.sort((a, b) => {
         const aFeatured = a.tags.includes('featured') ? 1 : 0;
         const bFeatured = b.tags.includes('featured') ? 1 : 0;
         return bFeatured - aFeatured;
       });
   }
 
+  const transformedProducts = filteredProducts.map(p => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.price,
+    originalPrice: p.original_price,
+    discount: p.discount,
+    image: p.image,
+    category: p.categories?.name || 'Uncategorized',
+    brand: p.brand,
+    rating: p.rating,
+    reviews: p.reviews,
+    inStock: p.in_stock,
+    stockQuantity: p.stock_quantity,
+    features: p.features,
+    tags: p.tags,
+    isTodaysDeals: p.is_todays_deals,
+    createdAt: p.created_at,
+    updatedAt: p.created_at
+  }));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl">Loading products...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
-      {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground">Home</Link>
@@ -88,7 +175,6 @@ export const Products: React.FC = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
       <section className="gradient-primary text-white py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -98,7 +184,6 @@ export const Products: React.FC = () => {
             Discover our complete collection of amazing products
           </p>
           
-          {/* Search Bar */}
           <div className="max-w-2xl mx-auto relative">
             <Input
               type="text"
@@ -113,18 +198,16 @@ export const Products: React.FC = () => {
       </section>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filters and Controls */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <div className="flex flex-wrap gap-4">
-              {/* Category Filter */}
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {mockCategories.map((category: Category) => (
+                  {categories.map((category) => (
                     <SelectItem key={category.id} value={category.name}>
                       {category.name}
                     </SelectItem>
@@ -132,7 +215,6 @@ export const Products: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              {/* Price Range Filter */}
               <Select value={priceRange} onValueChange={setPriceRange}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Price Range" />
@@ -146,7 +228,6 @@ export const Products: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              {/* Sort By */}
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Sort By" />
@@ -186,7 +267,6 @@ export const Products: React.FC = () => {
             </div>
           </div>
 
-          {/* Active Filters */}
           <div className="flex flex-wrap gap-2">
             {searchQuery && (
               <Badge variant="secondary">
@@ -224,9 +304,8 @@ export const Products: React.FC = () => {
           </div>
         </div>
 
-        {/* Products Grid/List */}
         {filteredProducts.length > 0 ? (
-          <ProductGrid products={filteredProducts} />
+          <ProductGrid products={transformedProducts} />
         ) : (
           <div className="text-center py-12">
             <h3 className="text-2xl font-semibold mb-4">No products found</h3>
@@ -246,12 +325,11 @@ export const Products: React.FC = () => {
           </div>
         )}
 
-        {/* Featured Categories */}
-        {searchQuery === '' && selectedCategory === 'all' && (
+        {searchQuery === '' && selectedCategory === 'all' && categories.length > 0 && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold mb-8 text-center">Shop by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {mockCategories.map((category: Category) => (
+              {categories.map((category) => (
                 <Card 
                   key={category.id} 
                   className="cursor-pointer hover:shadow-lg transition-normal group gradient-card"
@@ -259,12 +337,12 @@ export const Products: React.FC = () => {
                 >
                   <CardContent className="p-6 text-center">
                     <img 
-                      src={category.image} 
+                      src={category.image || '/placeholder.svg'} 
                       alt={category.name}
                       className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover group-hover:scale-110 transition-slow"
                     />
                     <h3 className="font-semibold mb-2">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground">{category.productCount} items</p>
+                    <p className="text-sm text-muted-foreground">{category.product_count} items</p>
                   </CardContent>
                 </Card>
               ))}
