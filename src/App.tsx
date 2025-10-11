@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Home } from "@/pages/Home";
@@ -14,6 +15,7 @@ import { ProductDetail } from "@/pages/ProductDetail";
 import { SignUp } from "@/pages/SignUp";
 import { Login } from "@/pages/Login";
 import { Cart } from "@/pages/Cart";
+import { Checkout } from "@/pages/Checkout";
 import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
 import { Account } from "@/pages/Account";
@@ -36,6 +38,8 @@ import { Settings } from "@/pages/admin/Settings";
 import { AddUser } from "@/pages/admin/AddUser";
 import { EditProduct } from "@/pages/admin/EditProduct";
 import { ViewOrder } from "@/pages/admin/ViewOrder";
+import { CategoryManagement } from "@/pages/admin/CategoryManagement";
+import { Auth } from "@/pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,11 +47,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
             {/* Store Routes */}
             <Route path="/" element={
               <Layout>
@@ -74,11 +79,17 @@ const App = () => (
                 <ProductDetail />
               </Layout>
             } />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/sign-up" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cart" element={
               <Layout>
                 <Cart />
+              </Layout>
+            } />
+            <Route path="/checkout" element={
+              <Layout>
+                <Checkout />
               </Layout>
             } />
             <Route path="/about" element={
@@ -166,6 +177,13 @@ const App = () => (
                 </AdminLayout>
               </Layout>
             } />
+            <Route path="/admin/categories" element={
+              <Layout>
+                <AdminLayout>
+                  <CategoryManagement />
+                </AdminLayout>
+              </Layout>
+            } />
             <Route path="/admin/users/new" element={
               <Layout>
                 <AdminLayout>
@@ -222,9 +240,10 @@ const App = () => (
                 <NotFound />
               </Layout>
             } />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

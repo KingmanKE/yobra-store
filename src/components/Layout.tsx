@@ -2,8 +2,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Moon, Sun, ShoppingCart, Search, User, Heart } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Moon, Sun, ShoppingCart, Search, User, Heart, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,8 +13,9 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut, isAdmin: userIsAdmin } = useAuth();
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -28,18 +31,21 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             Exclusive
           </Link>
           
-          {!isAdmin && (
+          {!isAdminRoute && (
             <nav className="flex-1 flex justify-center">
               <div className="hidden md:flex items-center gap-8">
                 <Link to="/" className="hover:underline">Home</Link>
                 <Link to="/contact" className="hover:underline">Contact</Link>
                 <Link to="/about" className="hover:underline">About</Link>
+                {userIsAdmin && (
+                  <Link to="/admin" className="hover:underline">Admin</Link>
+                )}
               </div>
             </nav>
           )}
 
           <div className="flex items-center gap-4">
-            {!isAdmin && (
+            {!isAdminRoute && (
               <>
                 <div className="relative">
                   <Input
@@ -58,17 +64,37 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Button variant="ghost" size="icon" className="relative" asChild>
                   <Link to="/cart">
                     <ShoppingCart className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      3
-                    </span>
                   </Link>
                 </Button>
                 
-                <Button variant="ghost" size="icon" asChild>
-                  <Link to="/account">
-                    <User className="h-5 w-5" />
-                  </Link>
-                </Button>
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <User className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to="/account">My Account</Link>
+                      </DropdownMenuItem>
+                      {userIsAdmin && (
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin">Admin Panel</Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => signOut()}>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button variant="ghost" asChild>
+                    <Link to="/auth">Sign In</Link>
+                  </Button>
+                )}
               </>
             )}
             
@@ -122,7 +148,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <h3 className="font-medium mb-4">Account</h3>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li><Link to="/account" className="hover:text-white">My Account</Link></li>
-                <li><Link to="/login" className="hover:text-white">Login / Register</Link></li>
+                <li><Link to="/auth" className="hover:text-white">Login / Register</Link></li>
                 <li><Link to="/cart" className="hover:text-white">Cart</Link></li>
                 <li><Link to="/wishlist" className="hover:text-white">Wishlist</Link></li>
                 <li><Link to="/" className="hover:text-white">Shop</Link></li>
