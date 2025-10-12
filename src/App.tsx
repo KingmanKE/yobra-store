@@ -39,6 +39,7 @@ import { AddUser } from "@/pages/admin/AddUser";
 import { EditProduct } from "@/pages/admin/EditProduct";
 import { ViewOrder } from "@/pages/admin/ViewOrder";
 import { CategoryManagement } from "@/pages/admin/CategoryManagement";
+import { TestUsers } from "@/pages/admin/TestUsers";
 import { Auth } from "@/pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -230,6 +231,13 @@ const App = () => (
               <Layout>
                 <AdminLayout>
                   <Settings />
+                </AdminLayout>
+              </Layout>
+            } />
+            <Route path="/admin/test-users" element={
+              <Layout>
+                <AdminLayout>
+                  <TestUsers />
                 </AdminLayout>
               </Layout>
             } />

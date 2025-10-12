@@ -1,1 +1,7 @@
 project_id = "sxwwwtpsndhpspcjupxb"
+
+[functions.create-test-users]
+verify_jwt = false
+
+[functions.send-invoice]
+verify_jwt = false

@@ -9,7 +9,8 @@ import {
   Settings, 
   Plus,
   ShoppingCart,
-  Activity
+  Activity,
+  UserPlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +43,11 @@ const adminNavItems = [
     title: 'Users',
     href: '/admin/users',
     icon: Users
+  },
+  {
+    title: 'Test Users',
+    href: '/admin/test-users',
+    icon: UserPlus
   },
   {
     title: 'User Activity',
