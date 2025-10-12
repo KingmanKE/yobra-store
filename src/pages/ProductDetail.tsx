@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,16 +14,64 @@ import {
   RotateCcw,
   MessageCircle
 } from 'lucide-react';
-import { mockProducts } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { redirectToWhatsApp } from '@/utils/whatsapp';
+import { useToast } from '@/hooks/use-toast';
 
 export const ProductDetail: React.FC = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const product = mockProducts.find(p => p.id === productId);
+  useEffect(() => {
+    fetchProduct();
+  }, [productId]);
+
+  const fetchProduct = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        categories (
+          id,
+          name
+        )
+      `)
+      .eq('id', productId)
+      .single();
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load product',
+        variant: 'destructive'
+      });
+    } else {
+      setProduct(data);
+      if (data?.category_id) {
+        fetchRelatedProducts(data.category_id);
+      }
+    }
+    setLoading(false);
+  };
+
+  const fetchRelatedProducts = async (categoryId: string) => {
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category_id', categoryId)
+      .neq('id', productId)
+      .limit(4);
+
+    if (data) {
+      setRelatedProducts(data);
+    }
+  };
 
   if (!product) {
     return (
@@ -36,12 +84,16 @@ export const ProductDetail: React.FC = () => {
     );
   }
 
+  if (loading) {
+    return <div className="container mx-auto px-4 py-16 text-center">Loading product...</div>;
+  }
+
   const handleOrder = () => {
     redirectToWhatsApp(product.name, product.price * quantity);
   };
 
-  const discountPercentage = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const discountPercentage = product?.original_price 
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
   // Mock additional images
@@ -107,7 +159,7 @@ export const ProductDetail: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="outline">{product.brand}</Badge>
-                <Badge variant="outline">{product.category}</Badge>
+                <Badge variant="outline">{product.categories?.name}</Badge>
               </div>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
               
@@ -127,9 +179,9 @@ export const ProductDetail: React.FC = () => {
 
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-4xl font-bold text-primary">${product.price}</span>
-                {product.originalPrice && (
+                {product.original_price && (
                   <span className="text-2xl text-muted-foreground line-through">
-                    ${product.originalPrice}
+                    ${product.original_price}
                   </span>
                 )}
               </div>
@@ -137,8 +189,8 @@ export const ProductDetail: React.FC = () => {
               <p className="text-muted-foreground mb-6">{product.description}</p>
 
               <div className="flex items-center gap-4 mb-6">
-                <Badge variant={product.inStock ? 'default' : 'destructive'} className="text-sm">
-                  {product.inStock ? `In Stock (${product.stockQuantity} available)` : 'Out of Stock'}
+                <Badge variant={product.in_stock ? 'default' : 'destructive'} className="text-sm">
+                  {product.in_stock ? `In Stock (${product.stock_quantity} available)` : 'Out of Stock'}
                 </Badge>
               </div>
 
@@ -156,8 +208,8 @@ export const ProductDetail: React.FC = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
-                    disabled={quantity >= product.stockQuantity}
+                    onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
+                    disabled={quantity >= product.stock_quantity}
                   >
                     +
                   </Button>
@@ -172,12 +224,12 @@ export const ProductDetail: React.FC = () => {
                   size="lg" 
                   className="flex-1 gradient-primary"
                   onClick={handleOrder}
-                  disabled={!product.inStock}
+                  disabled={!product.in_stock}
                 >
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Order via WhatsApp
                 </Button>
-                <Button variant="outline" size="lg" disabled={!product.inStock}>
+                <Button variant="outline" size="lg" disabled={!product.in_stock}>
                   <ShoppingBag className="h-5 w-5 mr-2" />
                   Add to Cart
                 </Button>
@@ -232,7 +284,7 @@ export const ProductDetail: React.FC = () => {
                     <strong>Brand:</strong> {product.brand}
                   </div>
                   <div>
-                    <strong>Category:</strong> {product.category}
+                    <strong>Category:</strong> {product.categories?.name}
                   </div>
                   <div>
                     <strong>Rating:</strong> {product.rating}/5
@@ -298,9 +350,7 @@ export const ProductDetail: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold mb-6">Related Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {mockProducts
-              .filter(p => p.category === product.category && p.id !== product.id)
-              .slice(0, 4)
+            {relatedProducts
               .map(relatedProduct => (
                 <Card key={relatedProduct.id} className="group cursor-pointer hover:shadow-lg transition-normal">
                   <CardContent className="p-4">

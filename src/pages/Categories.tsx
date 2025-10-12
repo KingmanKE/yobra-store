@@ -1,19 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductGrid } from '@/components/ProductGrid';
-import { mockCategories, mockProducts } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { Category, Product } from '@/types/product';
 import { ChevronRight, Filter, Grid, List } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const Categories: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<string>('name');
+  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load categories',
+        variant: 'destructive'
+      });
+    } else {
+      setCategories(data || []);
+    }
+    setLoading(false);
+  };
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        categories (
+          id,
+          name
+        )
+      `);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive'
+      });
+    } else {
+      setProducts(data || []);
+    }
+  };
 
   const categoryProducts = selectedCategory 
-    ? mockProducts.filter(p => p.category === selectedCategory.name)
+    ? products.filter(p => p.category_id === selectedCategory.id)
     : [];
 
   const sortedProducts = [...categoryProducts].sort((a, b) => {
@@ -45,7 +95,7 @@ export const Categories: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {mockCategories.map((category) => (
+                {categories.map((category) => (
                   <Card 
                     key={category.id}
                     className="group cursor-pointer hover:shadow-lg transition-normal gradient-card overflow-hidden"
@@ -63,7 +113,7 @@ export const Categories: React.FC = () => {
                         <p className="text-white/90 text-sm mb-3">{category.description}</p>
                         <div className="flex items-center justify-between">
                           <Badge className="bg-white/20 text-white">
-                            {category.productCount} products
+                            {category.product_count} products
                           </Badge>
                           <ChevronRight className="h-5 w-5 text-white group-hover:translate-x-1 transition-fast" />
                         </div>
@@ -78,7 +128,7 @@ export const Categories: React.FC = () => {
             <section>
               <h2 className="text-2xl font-bold mb-6">Popular Categories</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {mockCategories.slice(0, 4).map((category) => (
+                {categories.slice(0, 4).map((category) => (
                   <Card 
                     key={`popular-${category.id}`}
                     className="p-4 hover:shadow-md transition-normal cursor-pointer"
@@ -91,7 +141,7 @@ export const Categories: React.FC = () => {
                         className="w-16 h-16 mx-auto mb-3 rounded-lg object-cover"
                       />
                       <h3 className="font-semibold text-sm mb-1">{category.name}</h3>
-                      <p className="text-xs text-muted-foreground">{category.productCount} items</p>
+                      <p className="text-xs text-muted-foreground">{category.product_count} items</p>
                     </div>
                   </Card>
                 ))}

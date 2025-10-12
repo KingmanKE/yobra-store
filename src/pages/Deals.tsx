@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductGrid } from '@/components/ProductGrid';
-import { mockProducts } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import { Zap, Clock, Flame, TrendingUp } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const Deals: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState({
@@ -13,6 +14,30 @@ export const Deals: React.FC = () => {
     minutes: 45,
     seconds: 30
   });
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive'
+      });
+    } else {
+      setProducts(data || []);
+    }
+    setLoading(false);
+  };
 
   // Mock countdown timer
   useEffect(() => {
@@ -32,10 +57,10 @@ export const Deals: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const todaysDeals = mockProducts.filter(p => p.isTodaysDeals);
-  const flashDeals = mockProducts.filter(p => p.discount && p.discount > 10);
-  const dailyDeals = mockProducts.filter(p => p.discount && p.discount > 5).slice(0, 6);
-  const weeklyDeals = mockProducts.filter(p => p.tags.includes('featured')).slice(0, 4);
+  const todaysDeals = products.filter(p => p.is_todays_deals);
+  const flashDeals = products.filter(p => p.discount && p.discount > 10);
+  const dailyDeals = products.filter(p => p.discount && p.discount > 5).slice(0, 6);
+  const weeklyDeals = products.filter(p => p.tags && p.tags.includes('featured')).slice(0, 4);
 
   return (
     <div className="min-h-screen">

@@ -5,63 +5,122 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { mockProducts } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft } from 'lucide-react';
 
 export const EditProduct: React.FC = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
   const { toast } = useToast();
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const product = mockProducts.find(p => p.id === productId);
-
   const [formData, setFormData] = useState({
-    name: product?.name || '',
-    brand: product?.brand || '',
-    price: product?.price || 0,
-    originalPrice: product?.originalPrice || 0,
-    discount: product?.discount || 0,
-    category: product?.category || '',
-    description: product?.description || '',
-    image: product?.image || '',
-    inStock: product?.inStock ?? true,
-    stockQuantity: product?.stockQuantity || 0,
-    isTodaysDeals: product?.isTodaysDeals ?? false
+    name: '',
+    brand: '',
+    price: 0,
+    original_price: 0,
+    discount: 0,
+    category_id: '',
+    description: '',
+    image: '',
+    in_stock: true,
+    stock_quantity: 0,
+    is_todays_deals: false
   });
 
   useEffect(() => {
-    if (!product) {
+    fetchCategories();
+    fetchProduct();
+  }, [productId]);
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+
+    if (error) {
       toast({
-        title: "Product not found",
+        title: 'Error',
+        description: 'Failed to load categories',
+        variant: 'destructive'
+      });
+    } else {
+      setCategories(data || []);
+    }
+  };
+
+  const fetchProduct = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single();
+
+    if (error) {
+      toast({
+        title: 'Product not found',
         description: "The product you're trying to edit doesn't exist.",
-        variant: "destructive"
+        variant: 'destructive'
       });
       navigate('/admin/products');
+    } else if (data) {
+      setFormData({
+        name: data.name || '',
+        brand: data.brand || '',
+        price: data.price || 0,
+        original_price: data.original_price || 0,
+        discount: data.discount || 0,
+        category_id: data.category_id || '',
+        description: data.description || '',
+        image: data.image || '',
+        in_stock: data.in_stock ?? true,
+        stock_quantity: data.stock_quantity || 0,
+        is_todays_deals: data.is_todays_deals ?? false
+      });
     }
-  }, [product, navigate, toast]);
+    setLoading(false);
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.brand || formData.price <= 0) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields correctly.",
-        variant: "destructive"
+        title: 'Validation Error',
+        description: 'Please fill in all required fields correctly.',
+        variant: 'destructive'
       });
       return;
     }
 
-    toast({
-      title: "Product updated",
-      description: `${formData.name} has been updated successfully.`,
-    });
-    navigate('/admin/products');
+    const { error } = await supabase
+      .from('products')
+      .update(formData)
+      .eq('id', productId);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update product',
+        variant: 'destructive'
+      });
+    } else {
+      toast({
+        title: 'Product updated',
+        description: `${formData.name} has been updated successfully.`
+      });
+      navigate('/admin/products');
+    }
   };
 
-  if (!product) return null;
+  if (loading) {
+    return <div className="container mx-auto px-4 py-16 text-center">Loading product...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -119,8 +178,8 @@ export const EditProduct: React.FC = () => {
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.originalPrice}
-                  onChange={(e) => setFormData({ ...formData, originalPrice: parseFloat(e.target.value) })}
+                  value={formData.original_price}
+                  onChange={(e) => setFormData({ ...formData, original_price: parseFloat(e.target.value) })}
                 />
               </div>
 
@@ -138,20 +197,21 @@ export const EditProduct: React.FC = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
-                <select
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md bg-background text-foreground"
-                  required
+                <Select
+                  value={formData.category_id}
+                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                 >
-                  <option value="">Select Category</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Gaming">Gaming</option>
-                  <option value="Fashion">Fashion</option>
-                  <option value="Home">Home</option>
-                  <option value="Sports">Sports</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -160,8 +220,8 @@ export const EditProduct: React.FC = () => {
                   id="stockQuantity"
                   type="number"
                   min="0"
-                  value={formData.stockQuantity}
-                  onChange={(e) => setFormData({ ...formData, stockQuantity: parseInt(e.target.value) })}
+                  value={formData.stock_quantity}
+                  onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) })}
                 />
               </div>
 
@@ -194,8 +254,8 @@ export const EditProduct: React.FC = () => {
               </div>
               <Switch
                 id="inStock"
-                checked={formData.inStock}
-                onCheckedChange={(checked) => setFormData({ ...formData, inStock: checked })}
+                checked={formData.in_stock}
+                onCheckedChange={(checked) => setFormData({ ...formData, in_stock: checked })}
               />
             </div>
 
@@ -206,8 +266,8 @@ export const EditProduct: React.FC = () => {
               </div>
               <Switch
                 id="todaysDeals"
-                checked={formData.isTodaysDeals}
-                onCheckedChange={(checked) => setFormData({ ...formData, isTodaysDeals: checked })}
+                checked={formData.is_todays_deals}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_todays_deals: checked })}
               />
             </div>
 

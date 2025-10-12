@@ -1,26 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ProductGrid } from '@/components/ProductGrid';
-import { mockProducts, mockCategories } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { Product, Category } from '@/types/product';
 import { ChevronRight, TrendingUp, Zap, Star } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const Store: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load categories',
+        variant: 'destructive'
+      });
+    } else {
+      setCategories(data || []);
+    }
+    setLoading(false);
+  };
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive'
+      });
+    } else {
+      setProducts(data || []);
+    }
+  };
 
   const filteredProducts = selectedCategory
-    ? mockProducts.filter(product => product.category === selectedCategory)
-    : mockProducts;
+    ? products.filter(product => product.category_id === selectedCategory)
+    : products;
 
-  const handleViewDetails = (product: Product) => {
+  const handleViewDetails = (product: any) => {
     setSelectedProduct(product);
   };
 
-  const featuredProducts = mockProducts.filter(p => p.tags.includes('featured') || p.tags.includes('popular'));
-  const dealProducts = mockProducts.filter(p => p.discount && p.discount > 10);
+  const featuredProducts = products.filter(p => p.tags && (p.tags.includes('featured') || p.tags.includes('popular')));
+  const dealProducts = products.filter(p => p.discount && p.discount > 10);
 
   return (
     <div className="min-h-screen">
@@ -51,11 +95,11 @@ export const Store: React.FC = () => {
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Shop by Category</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockCategories.map((category: Category) => (
+            {categories.map((category) => (
               <Card 
                 key={category.id} 
                 className="cursor-pointer hover:shadow-lg transition-normal group gradient-card"
-                onClick={() => setSelectedCategory(category.name)}
+                onClick={() => setSelectedCategory(category.id)}
               >
                 <CardContent className="p-4 text-center">
                   <img 
@@ -64,7 +108,7 @@ export const Store: React.FC = () => {
                     className="w-16 h-16 mx-auto mb-3 rounded-lg object-cover group-hover:scale-110 transition-slow"
                   />
                   <h3 className="font-semibold text-sm mb-1">{category.name}</h3>
-                  <p className="text-xs text-muted-foreground">{category.productCount} items</p>
+                  <p className="text-xs text-muted-foreground">{category.product_count} items</p>
                 </CardContent>
               </Card>
             ))}
@@ -116,7 +160,7 @@ export const Store: React.FC = () => {
         {!selectedCategory && (
           <section>
             <h2 className="text-2xl font-bold mb-6">All Products</h2>
-            <ProductGrid products={mockProducts} onViewDetails={handleViewDetails} />
+            <ProductGrid products={products} onViewDetails={handleViewDetails} />
           </section>
         )}
       </div>
