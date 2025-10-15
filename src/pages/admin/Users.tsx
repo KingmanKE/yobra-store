@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,8 @@ import {
   User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { usersApi } from '@/services/api';
 
 interface User {
   id: string;
@@ -95,11 +97,47 @@ const mockUsers: User[] = [
 
 export const Users: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredUsers = mockUsers.filter(user => {
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await usersApi.getAll();
+      const formattedUsers = (data.users || []).map((user: any) => ({
+        id: user.id,
+        name: user.full_name || user.email.split('@')[0],
+        email: user.email,
+        phone: user.phone || '',
+        location: user.location || '',
+        joinDate: new Date(user.created_at).toISOString().split('T')[0],
+        status: 'active',
+        role: user.roles?.includes('admin') ? 'admin' : 'customer',
+        totalOrders: 0,
+        totalSpent: 0
+      }));
+      setUsers(formattedUsers);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load users',
+        variant: 'destructive'
+      });
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
@@ -121,11 +159,11 @@ export const Users: React.FC = () => {
   };
 
   const userStats = {
-    total: mockUsers.length,
-    active: mockUsers.filter(u => u.status === 'active').length,
-    inactive: mockUsers.filter(u => u.status === 'inactive').length,
-    admins: mockUsers.filter(u => u.role === 'admin').length,
-    customers: mockUsers.filter(u => u.role === 'customer').length,
+    total: users.length,
+    active: users.filter(u => u.status === 'active').length,
+    inactive: users.filter(u => u.status === 'inactive').length,
+    admins: users.filter(u => u.role === 'admin').length,
+    customers: users.filter(u => u.role === 'customer').length,
   };
 
   return (
