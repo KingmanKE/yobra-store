@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,6 @@ import {
   Truck
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { ordersApi } from '@/services/api';
 
 interface Order {
   id: string;
@@ -84,44 +82,10 @@ const mockOrders: Order[] = [
 
 export const Orders: React.FC = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const data = await ordersApi.getAll();
-      const formattedOrders = (data.orders || []).map((order: any) => ({
-        id: order.id,
-        orderNumber: order.order_number,
-        customerName: order.customer_name,
-        customerEmail: order.customer_email,
-        date: new Date(order.created_at).toISOString().split('T')[0],
-        status: order.status,
-        total: parseFloat(order.total_amount),
-        items: Array.isArray(order.items) ? order.items.length : 0
-      }));
-      setOrders(formattedOrders);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load orders',
-        variant: 'destructive'
-      });
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());

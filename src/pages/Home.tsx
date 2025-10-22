@@ -4,22 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Star, Eye, Heart, ArrowRight } from "lucide-react";
-import { productsApi, categoriesApi } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
 
 export const Home = () => {
-  const { toast } = useToast();
   const [timeLeft, setTimeLeft] = useState({
     days: 3,
     hours: 23,
     minutes: 19,
     seconds: 56
   });
-  const [flashSaleProducts, setFlashSaleProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [bestSellingProducts, setBestSellingProducts] = useState<any[]>([]);
-  const [exploreProducts, setExploreProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -32,45 +24,169 @@ export const Home = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [dealsData, categoriesData, allProductsData] = await Promise.all([
-          productsApi.getAll({ deals: true, limit: 4 }),
-          categoriesApi.getAll(),
-          productsApi.getAll({ limit: 16 })
-        ]);
+  const flashSaleProducts = [
+    {
+      id: "1",
+      name: "HAVIT HV-G92 Gamepad",
+      price: 120,
+      originalPrice: 160,
+      discount: 40,
+      rating: 4.5,
+      reviews: 88,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "2", 
+      name: "AK-900 Wired Keyboard",
+      price: 960,
+      originalPrice: 1160,
+      discount: 35,
+      rating: 4.0,
+      reviews: 75,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "3",
+      name: "IPS LCD Gaming Monitor", 
+      price: 370,
+      originalPrice: 400,
+      discount: 30,
+      rating: 5.0,
+      reviews: 99,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "4",
+      name: "S-Series Comfort Chair",
+      price: 375,
+      originalPrice: 400,
+      discount: 25,
+      rating: 4.5,
+      reviews: 99,
+      image: "/placeholder.svg"
+    }
+  ];
 
-        setFlashSaleProducts(dealsData.products || []);
-        setCategories(categoriesData.categories || []);
-        setBestSellingProducts((allProductsData.products || []).slice(0, 4));
-        setExploreProducts((allProductsData.products || []).slice(4, 12));
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load products. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const categories = [
+    { name: "Phones", icon: "📱" },
+    { name: "Computers", icon: "💻" },
+    { name: "SmartWatch", icon: "⌚" },
+    { name: "Camera", icon: "📷", active: true },
+    { name: "HeadPhones", icon: "🎧" },
+    { name: "Gaming", icon: "🎮" }
+  ];
 
-    fetchData();
-  }, [toast]);
+  const bestSellingProducts = [
+    {
+      id: "1",
+      name: "The north coat",
+      price: 260,
+      originalPrice: 360,
+      rating: 5.0,
+      reviews: 65,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "2",
+      name: "Gucci duffle bag", 
+      price: 960,
+      originalPrice: 1160,
+      rating: 4.5,
+      reviews: 65,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "3",
+      name: "RGB liquid CPU Cooler",
+      price: 160,
+      originalPrice: 170,
+      rating: 4.5,
+      reviews: 65,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "4",
+      name: "Small BookShelf",
+      price: 360,
+      rating: 5.0,
+      reviews: 65,
+      image: "/placeholder.svg"
+    }
+  ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const exploreProducts = [
+    {
+      id: "1",
+      name: "Breed Dry Dog Food",
+      price: 100,
+      rating: 3.0,
+      reviews: 35,
+      image: "/placeholder.svg",
+      colors: ["#FB7701", "#DB4444"]
+    },
+    {
+      id: "2",
+      name: "CANON EOS DSLR Camera",
+      price: 360,
+      rating: 4.0,
+      reviews: 95,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "3",
+      name: "ASUS FHD Gaming Laptop",
+      price: 700,
+      rating: 5.0,
+      reviews: 325,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "4",
+      name: "Curology Product Set",
+      price: 500,
+      rating: 4.0,
+      reviews: 145,
+      image: "/placeholder.svg"
+    },
+    {
+      id: "5",
+      name: "Kids Electric Car",
+      price: 960,
+      rating: 5.0,
+      reviews: 65,
+      image: "/placeholder.svg",
+      colors: ["#EEFF61", "#DB4444"],
+      isNew: true
+    },
+    {
+      id: "6",
+      name: "Jr. Zoom Soccer Cleats",
+      price: 1160,
+      rating: 5.0,
+      reviews: 35,
+      image: "/placeholder.svg",
+      colors: ["#EEFF61", "#DB4444"]
+    },
+    {
+      id: "7",
+      name: "GP11 Shooter USB Gamepad",
+      price: 660,
+      rating: 4.5,
+      reviews: 55,
+      image: "/placeholder.svg",
+      colors: ["#184A48", "#DB4444"],
+      isNew: true
+    },
+    {
+      id: "8", 
+      name: "Quilted Satin Jacket",
+      price: 660,
+      rating: 4.5,
+      reviews: 55,
+      image: "/placeholder.svg",
+      colors: ["#184A48", "#DB4444"]
+    }
+  ];
 
   return (
     <div className="min-h-screen">
@@ -132,18 +248,12 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {flashSaleProducts.length === 0 ? (
-              <div className="col-span-4 text-center py-8 text-gray-500">
-                No flash sale products available at the moment.
-              </div>
-            ) : flashSaleProducts.map((product) => (
+            {flashSaleProducts.map((product) => (
               <Card key={product.id} className="group relative overflow-hidden">
                 <CardContent className="p-0">
-                  {product.discount && (
-                    <div className="absolute top-3 left-3 bg-destructive text-white px-2 py-1 text-xs rounded z-10">
-                      -{product.discount}%
-                    </div>
-                  )}
+                  <div className="absolute top-3 left-3 bg-destructive text-white px-2 py-1 text-xs rounded z-10">
+                    -{product.discount}%
+                  </div>
                   <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
                     <Button size="icon" variant="outline" className="h-8 w-8 bg-white">
                       <Heart className="h-4 w-4" />
@@ -154,11 +264,9 @@ export const Home = () => {
                   </div>
                   
                   <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full flex items-center justify-center text-4xl">
+                      🎮
+                    </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-3 transform translate-y-full group-hover:translate-y-0 transition-transform">
                       <Button className="w-full bg-black hover:bg-gray-800 text-white">
                         Add To Cart
@@ -215,24 +323,13 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.length === 0 ? (
-              <div className="col-span-6 text-center py-8 text-gray-500">
-                No categories available.
-              </div>
-            ) : categories.slice(0, 6).map((category) => (
-              <Link to={`/products?category=${category.id}`} key={category.id}>
-                <Card className="cursor-pointer hover:bg-destructive hover:text-white transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      className="w-16 h-16 object-cover mx-auto mb-4 rounded-full"
-                    />
-                    <div className="font-medium">{category.name}</div>
-                    <div className="text-xs text-gray-500 mt-1">{category.product_count} items</div>
-                  </CardContent>
-                </Card>
-              </Link>
+            {categories.map((category) => (
+              <Card key={category.name} className={`cursor-pointer hover:bg-destructive hover:text-white transition-colors ${category.active ? 'bg-destructive text-white' : ''}`}>
+                <CardContent className="p-6 text-center">
+                  <div className="text-4xl mb-4">{category.icon}</div>
+                  <div className="font-medium">{category.name}</div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -254,11 +351,7 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bestSellingProducts.length === 0 ? (
-              <div className="col-span-4 text-center py-8 text-gray-500">
-                No products available.
-              </div>
-            ) : bestSellingProducts.map((product) => (
+            {bestSellingProducts.map((product) => (
               <Card key={product.id} className="group relative overflow-hidden">
                 <CardContent className="p-0">
                   <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
@@ -271,11 +364,9 @@ export const Home = () => {
                   </div>
                   
                   <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full flex items-center justify-center text-4xl">
+                      👕
+                    </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-3 transform translate-y-full group-hover:translate-y-0 transition-transform">
                       <Button className="w-full bg-black hover:bg-gray-800 text-white">
                         Add To Cart
@@ -287,8 +378,8 @@ export const Home = () => {
                     <h3 className="font-medium mb-2">{product.name}</h3>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-destructive font-bold">${product.price}</span>
-                      {product.original_price && (
-                        <span className="text-gray-500 line-through text-sm">${product.original_price}</span>
+                      {product.originalPrice && (
+                        <span className="text-gray-500 line-through text-sm">${product.originalPrice}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-1">
@@ -379,16 +470,12 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {exploreProducts.length === 0 ? (
-              <div className="col-span-4 text-center py-8 text-gray-500">
-                No products available.
-              </div>
-            ) : exploreProducts.map((product) => (
+            {exploreProducts.map((product) => (
               <Card key={product.id} className="group relative overflow-hidden">
                 <CardContent className="p-0">
-                  {product.in_stock === false && (
-                    <div className="absolute top-3 left-3 bg-gray-500 text-white px-2 py-1 text-xs rounded z-10">
-                      OUT OF STOCK
+                  {product.isNew && (
+                    <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 text-xs rounded z-10">
+                      NEW
                     </div>
                   )}
                   <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
@@ -401,11 +488,9 @@ export const Home = () => {
                   </div>
                   
                   <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full flex items-center justify-center text-4xl">
+                      🎁
+                    </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-3 transform translate-y-full group-hover:translate-y-0 transition-transform">
                       <Button className="w-full bg-black hover:bg-gray-800 text-white">
                         Add To Cart
@@ -418,14 +503,21 @@ export const Home = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-destructive font-bold">${product.price}</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 mb-2">
                       <div className="flex text-yellow-400">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4" fill={i < Math.floor(product.rating || 0) ? "currentColor" : "none"} />
+                          <Star key={i} className="w-4 h-4" fill={i < Math.floor(product.rating) ? "currentColor" : "none"} />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-500">({product.reviews || 0})</span>
+                      <span className="text-sm text-gray-500">({product.reviews})</span>
                     </div>
+                    {product.colors && (
+                      <div className="flex gap-1">
+                        {product.colors.map((color, index) => (
+                          <div key={index} className="w-4 h-4 rounded-full border" style={{ backgroundColor: color }}></div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

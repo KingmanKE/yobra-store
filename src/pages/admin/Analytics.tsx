@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,6 @@ import {
   Calendar,
   Download
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { analyticsApi } from '@/services/api';
 import {
   LineChart,
   Line,
@@ -59,41 +57,6 @@ const topProducts = [
 ];
 
 export const Analytics: React.FC = () => {
-  const { toast } = useToast();
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const data = await analyticsApi.getDashboard();
-      setDashboardData(data);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load analytics data',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading || !dashboardData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading analytics...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -129,10 +92,10 @@ export const Analytics: React.FC = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${dashboardData.totalRevenue?.toLocaleString() || '0'}</div>
+            <div className="text-2xl font-bold">$328,000</div>
             <p className="text-xs text-muted-foreground">
               <TrendingUp className="inline h-3 w-3 mr-1 text-green-500" />
-              {dashboardData.revenueChange || '+0%'} from last month
+              +12.5% from last month
             </p>
           </CardContent>
         </Card>
